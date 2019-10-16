@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/iconfont.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/jquery-1.12.4.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="common_title">
+            用户信息修改
+        </div>
+        <div class="container-fluid common_con">
+            <form class="form-horizontal article_form">
+                <div class="form-group">
+                    <label for="username" class="col-sm-2 control-label">用户名称：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="username" id="username" value="李思思">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nickname" class="col-sm-2 control-label">昵称：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="nickname" id="nickname" value="思思">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="col-sm-2 control-label">邮箱：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="email" id="email" value="lisisi@126.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_pic" class="col-sm-2 control-label">用户图标：</label>
+                    <div class="col-sm-10">
+                        <!-- 给img单独设置一个id -->
+                        <img src="images/2.jpg" alt="" class="user_pic" id="avatar">
+                        <input type="file" name="user_pic" id="user_pic">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="col-sm-2 control-label">密码：</label>
+                    <div class="col-sm-4">
+                        <input type="password" class="form-control" name="password" id="password" value="12345678">
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" id="submit" class="btn btn-success">修改</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 表单没有填写完整的模态框Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示！</h4>
+                </div>
+                <div class="modal-body">
+                    请完整填写表单！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+                    <!-- <button type="button" class="btn btn-primary" id="logout2">确认退出</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入boot js文件 -->
+    <script src="./js/bootstrap/js/bootstrap.min.js"></script>
+    <script src="./tool/config.js"></script>
+    <script src="./tool/user.js"></script>
+    <script>
+        //   1. 请求用户详细信息
+        user.getAllInfo({
+            callback: function (res) {
+                // console.log(res)
+                if (res.code == 200) {
+                    // 遍历res，data
+                    var data = res.data;
+                    $.each(data, function (k, value) {
+                        // console.log(i,ele)
+                        // 因为头像需要单独设置，所有先判断要操作的是不是user_pic，不是用val，是的话改变src
+                        if (k !== 'user_pic') {
+                            $('#' + k).val(value)
+                        }
+                        else (
+                            // 给文件域前面的img设置图片
+                            $('#avatar').prop('src', value)
+                        )
+                    })
+                }
+            }
+
+        })
+        // 2.用户信息编辑
+        $('#submit').on('click', function () {
+            var fd = new FormData($('form')[0])//传入DOM对象形式的form标签
+            // console.log($('form')[0])
+            // console.log( fd.get('password'))
+            if (
+                fd.get('username').trim() === '' ||
+                fd.get('password').trim() === '' ||
+                fd.get('nickname').trim() === '' ||
+                fd.get('email').trim() === '' ||
+                fd.get('user_pic').size === 0
+            ) {
+                // 说明表单没有提交完整，用模态框提示
+                $('#myModal').modal('show')
+                return;
+            }
+            // console.log('发送请求')
+            // 发送请求
+            user.edit({
+                data:fd,
+                callback:function (res) {
+                    //  更新数据 
+                    console.log(res)
+                    if (res.code == 200) {
+                        //  应当让外面的父元素进行跳转
+                        console.log('成功修改')
+                        // window.parent-- 获取了父页面的window对象
+                       window.parent.location.href = "./login.html"
+                    }
+                }
+            })
+           
+
+
+
+
+        })
+        //    本地图片预览
+        $('#user_pic').on('change', function () {
+            // 获取文件域中的文件信息
+            var tempfile = this.files[0];
+            console.log(tempfile)
+            // 生成临时图片地址
+            var temsrc = URL.createObjectURL(tempfile)
+            $('#avatar').prop('src', temsrc)
+        })
+
+
+
+    </script>
+</body>
+
+</html>
